@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { Typography, Button, message, Input, Spin, Alert } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import * as tf from '@tensorflow/tfjs';
+
+import React, { useEffect, useState } from "react";
+import { Typography, Button, message, Input, Spin, Alert } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import * as tf from "@tensorflow/tfjs";
 
 const { Title, Paragraph } = Typography;
 
 const Task1 = () => {
-  const [label, setLabel] = useState<string>('');
+  const [label, setLabel] = useState<string>("");
   const [model, setModel] = useState<any>();
   const [uploadedImage, setUploadedImage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const Task1 = () => {
     setError(null);
     const file = e.target.files && e.target.files[0];
     if (file) {
-      console.log('Image uploaded.');
+      console.log("Image uploaded.");
       message.success(`${file.name} file uploaded successfully.`);
       const imageUrl = URL.createObjectURL(file);
       setUploadedImage(imageUrl); // Display uploaded image
@@ -68,7 +69,7 @@ const Task1 = () => {
 
       reader.readAsDataURL(imageFile);
     } catch (error) {
-      setError('Error classifying image. Please try again.');
+      setError("Error classifying image. Please try again.");
       setLoading(false);
     }
   };
@@ -87,24 +88,28 @@ const Task1 = () => {
     // Get the index of the class with the highest probability
     const predictedClassIndex = predictions.argMax(1).dataSync()[0];
     // Retrieve the class labels from your dataset
-    const classLabels = ['bed', 'chair', 'dresser', 'lamp', 'sofa', 'table'];
+    const classLabels = ["bed", "chair", "dresser", "lamp", "sofa", "table"];
     // Get the label corresponding to the predicted class index
     const predictedLabel = classLabels[predictedClassIndex];
     return predictedLabel;
   };
 
   const handleGoBack = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-blue-200 to-blue-400">
+    <div className="flex flex-col h-screen bg-gray-100">
       {/* Top section */}
-      <div className="flex justify-center items-center h-1/6 text-xl border-b border-black bg-blue-300">
+      <div className="flex justify-center items-center h-1/6 text-xl border-b border-gray-300 bg-white">
         <div className="p-6 text-center">
-          <Title level={2} className="text-white">Task 1: Classify Images by Furniture Category</Title>
-          <Paragraph className="text-white">
-            Upload an image of furniture to classify it into one of the following categories: beds, chairs, dressers, lamps, sofas, or tables.
+          <Title level={2} className="text-gray-800">
+            Task 1: Classify Images by Furniture Category
+          </Title>
+          <Paragraph className="text-gray-600">
+            Upload an image of furniture to classify it into one of the
+            following categories: beds, chairs, dressers, lamps, sofas, or
+            tables.
           </Paragraph>
         </div>
       </div>
@@ -118,30 +123,78 @@ const Task1 = () => {
           className="hidden"
           id="uploadInput"
         />
-        <label htmlFor="uploadInput" className="w-2/3 h-3/4 flex justify-center items-center border  rounded-lg overflow-hidden cursor-pointer bg-white border-black">
+        <label
+          htmlFor="uploadInput"
+          className="w-2/3 h-3/4 flex justify-center items-center border border-gray-300 rounded-lg overflow-hidden cursor-pointer bg-white shadow-sm hover:bg-gray-200 transition duration-300 ease-in-out"
+        >
           <div className="text-center">
             {uploadedImage ? (
-              <img src={uploadedImage} alt="Uploaded" className="max-w-full max-h-full" />
+              <img
+                src={uploadedImage}
+                alt="Uploaded"
+                className="max-w-full max-h-full"
+              />
             ) : (
               <>
-                <UploadOutlined style={{ fontSize: '32px', color: '#1890ff' }} />
-                <Paragraph className="mt-2 text-gray-800">Click or drag image to upload</Paragraph>
+                <UploadOutlined
+                  style={{ fontSize: "32px", color: "#6B7280" }}
+                />
+                <Paragraph className="mt-2 text-gray-600">
+                  Click or drag image to upload
+                </Paragraph>
               </>
             )}
           </div>
         </label>
         {/* Label display */}
-        <div className="absolute top-0 right-0 p-4 text-white">
-          <Input value={label} placeholder="Classified Label" className="w-48" />
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1,
+            animation: label ? "pulse 1s infinite" : "none"
+          }}
+        >
+          <Input
+            value={label}
+            placeholder="Classified Label"
+            style={{
+              width: "300px",
+              fontSize: "24px",
+              padding: "15px",
+              borderRadius: "10px",
+              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "white",
+              color: "black",
+              transition: "all 0.3s ease-in-out"
+            }}
+          />
         </div>
         {/* Loading spinner */}
-        {loading && <Spin className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
+        {loading && (
+          <Spin className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+        )}
         {/* Error message */}
-        {error && <Alert message={error} type="error" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
+        {error && (
+          <Alert
+            message={error}
+            type="error"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          />
+        )}
       </div>
       {/* Bottom section */}
-      <div className="flex justify-center items-center h-1/6 text-xl border-t border-black bg-blue-300">
-        <Button type="primary" onClick={handleGoBack} className="w-1/3 h-1/3">Back</Button>
+      <div className="flex justify-center items-center h-1/6 text-xl border-t border-gray-300 bg-white">
+        <Button
+          type="primary"
+          onClick={handleGoBack}
+          className="w-1/3 h-1/3"
+          style={{ backgroundColor: "#6B7280", borderColor: "#6B7280" }}
+        >
+          Back
+        </Button>
       </div>
     </div>
   );
