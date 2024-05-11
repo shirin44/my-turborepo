@@ -1,6 +1,7 @@
 "use client";
+
 import React, { useState } from 'react';
-import { Typography, Button, Upload, message } from 'antd';
+import { Typography, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
@@ -8,17 +9,18 @@ const { Title, Paragraph } = Typography;
 const Task2 = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
-  const handleUpload = (info: any) => {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-      // Set the uploaded image to display
-      setUploadedImage(URL.createObjectURL(info.file.originFileObj));
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target) {
+          // Set the uploaded image to display
+          setUploadedImage(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+      message.success(`${file.name} file uploaded successfully.`);
     }
   };
 
@@ -41,22 +43,25 @@ const Task2 = () => {
       <div className="flex-1 flex bg-gray-300">
         {/* Upload area */}
         <div className="w-2/3 h-full flex flex-col justify-center items-center border-r border-black">
-          <Upload
-            action=""
-            beforeUpload={() => false}
-            showUploadList={false}
+          <input
+            type="file"
+            accept="image/*"
             onChange={handleUpload}
-            className="w-full h-3/4 flex justify-center items-center rounded-lg overflow-hidden"
-          >
-            {uploadedImage ? (
-              <img src={uploadedImage} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-            ) : (
-              <div className="text-center">
-                <UploadOutlined style={{ fontSize: '32px' }} />
-                <Paragraph className="mt-2">Click or drag image to upload</Paragraph>
-              </div>
-            )}
-          </Upload>
+            className="hidden"
+            id="uploadInput"
+          />
+          <label htmlFor="uploadInput" className="w-2/3 h-3/4 flex justify-center items-center border rounded-lg overflow-hidden cursor-pointer bg-white border-black">
+            <div className="text-center">
+              {uploadedImage ? (
+                <img src={uploadedImage} alt="Uploaded" className="max-w-full max-h-full" />
+              ) : (
+                <>
+                  <UploadOutlined style={{ fontSize: '32px', color: '#1890ff' }} />
+                  <Paragraph className="mt-2 text-gray-800">Click or drag image to upload</Paragraph>
+                </>
+              )}
+            </div>
+          </label>
         </div>
         {/* Recommended images area */}
         <div className="w-1/3 bg-white">

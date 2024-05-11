@@ -118,7 +118,7 @@ const Task1 = () => {
           className="hidden"
           id="uploadInput"
         />
-        <label htmlFor="uploadInput" className="w-2/3 h-3/4 flex justify-center items-center border  rounded-lg overflow-hidden cursor-pointer bg-white border-red-500">
+        <label htmlFor="uploadInput" className="w-2/3 h-3/4 flex justify-center items-center border  rounded-lg overflow-hidden cursor-pointer bg-white border-black">
           <div className="text-center">
             {uploadedImage ? (
               <img src={uploadedImage} alt="Uploaded" className="max-w-full max-h-full" />

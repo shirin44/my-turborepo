@@ -26,6 +26,7 @@
   "dependencies": {
     "@tensorflow/tfjs": "^4.19.0",
     "@tensorflow/tfjs-converter": "^4.19.0",
-    "antd": "^5.17.0"
+    "antd": "^5.17.0",
+    "googleapis": "^137.1.0"
   }
 }
