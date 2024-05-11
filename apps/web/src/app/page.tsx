@@ -20,14 +20,14 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-pink-300 via-pink-200 to-pink-100">
+    <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="w-2/3 p-8 rounded-lg bg-white shadow-lg">
-        <Title className="text-4xl mb-6 text-pink-800">Furniture Recommender</Title>
-        <Paragraph className="text-lg mb-6 text-pink-900">
+        <Title className="text-4xl mb-6 text-gray-800">Furniture Recommender</Title>
+        <Paragraph className="text-lg mb-6 text-gray-900">
           This website showcases the results of our machine learning project. 
           Users can explore furniture recommendations and more!
         </Paragraph>
-        <div className="text-lg mb-6 text-pink-900">
+        <div className="text-lg mb-6 text-gray-900">
           <Title level={3}>Team Number: 7</Title>
           <Title level={3}>Team Members:</Title>
           <ul className="list-disc list-inside">
@@ -39,13 +39,13 @@ const LandingPage = () => {
           </ul>
         </div>
         <div className="flex justify-center">
-          <Button type="primary" className="mr-4 bg-pink-600 hover:bg-pink-700" onClick={handleTask1Click}>
+          <Button type="primary" className="mr-4 bg-gray-800 hover:bg-gray-900" onClick={handleTask1Click}>
             Task 1: Furniture Image Classification
           </Button>
-          <Button type="primary" className="mr-4 bg-pink-600 hover:bg-pink-700" onClick={handleTask2Click}>
+          <Button type="primary" className="mr-4 bg-gray-800 hover:bg-gray-900" onClick={handleTask2Click}>
             Task 2: Furniture Recommendation
           </Button>
-          <Button type="primary" className="bg-pink-600 hover:bg-pink-700" onClick={handleTask3Click}>
+          <Button type="primary" className="bg-gray-800 hover:bg-gray-900" onClick={handleTask3Click}>
             Task 3: Furniture Style Recognition
           </Button>
         </div>
