@@ -9,6 +9,7 @@ from tensorflow.keras.preprocessing import image as img_preprocessing
 from tensorflow.keras.applications.resnet import preprocess_input
 from tensorflow.keras.models import load_model
 import pandas as pd
+import random
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -40,49 +41,44 @@ def get_recommendations():
 
         # Extract features using ResNet model
         feature_vector = resnet_model.predict(img_array)
+        feature_vector = feature_vector.flatten()
+        print(f"Feature vector: {feature_vector}")
 
         # Query k-NN model for recommendations
-        _, indices = knn_model.kneighbors(feature_vector, n_neighbors=10)
+        _, indices = knn_model.kneighbors(feature_vector.reshape(1, -1), n_neighbors=10)  # Increased neighbors for more options
 
         # Get filenames of recommended images
         recommended_images = []
 
-        # Iterate through indices and get corresponding image paths from DataFrame
-        for index in indices[0]:
+        # Add randomization to ensure diverse recommendations
+        selected_indices = random.sample(list(indices[0]), 10)  # Randomly select 10 from 20 neighbors
+
+        for index in selected_indices:
             image_path = image_df.iloc[index]['Img']
-            recommended_images.append(image_path)
+            recommended_images.append(image_path.replace('/Furniture_Data', ''))
 
-        # Remove the duplicate '/Furniture_Data' from image paths
-        recommended_images = [path.replace('/Furniture_Data', '') for path in recommended_images]
-
+        print(f"Recommended images: {recommended_images}")
         return jsonify(recommended_images)
-
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify(error='Failed to process request'), 500
 
-
 # Route to serve images
 @app.route('/Furniture_Data/<category>/<style>/<filename>')
 def get_image(category, style, filename):
-    # Construct the full path to the image file
     image_path = os.path.join(IMAGE_DIR, category, style, filename)
-    
-    # Check if the image exists
     if os.path.isfile(image_path):
-        # Serve the image
-        return send_file(image_path, mimetype='image/jpeg')
+        response = send_file(image_path, mimetype='image/jpeg')
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     else:
-        # Return a 404 error if the image does not exist
         return "Image not found", 404
-
 
 # Function to get the full image path
 def get_image_path(category, style, filename):
-    # Define the base directory for images
     base_dir = os.path.join(IMAGE_DIR, "Furniture_Data")
-
-    # Define a dictionary to map category and style to their respective directories
     category_dirs = {
         "beds": "beds",
         "chairs": "chairs",
@@ -91,7 +87,6 @@ def get_image_path(category, style, filename):
         "sofas": "sofas",
         "tables": "tables"
     }
-
     style_dirs = {
         "Asian": "Asian",
         "Beach": "Beach",
@@ -111,8 +106,6 @@ def get_image_path(category, style, filename):
         "Tropical": "Tropical",
         "Victorian": "Victorian"
     }
-
-    # Construct the full directory path
     category_dir = category_dirs.get(category)
     style_dir = style_dirs.get(style)
     if category_dir and style_dir:
@@ -120,7 +113,6 @@ def get_image_path(category, style, filename):
         return os.path.join(full_dir, filename)
     else:
         return None
-
 
 # Run the Flask app
 if __name__ == '__main__':
