@@ -125,8 +125,7 @@ const Task1 = () => {
         />
         <label
           htmlFor="uploadInput"
-          className="w-2/3 h-3/4 flex justify-center items-center border border-gray-300 rounded-lg overflow-hidden cursor-pointer bg-white shadow-sm hover:bg-gray-200 transition duration-300 ease-in-out"
-        >
+          className="w-2/3 h-3/4 flex justify-center items-center border border-gray-300 rounded-lg overflow-hidden cursor-pointer bg-white shadow-sm hover:bg-gray-200 transition duration-300 ease-in-out animate-pulse"       >
           <div className="text-center">
             {uploadedImage ? (
               <img
@@ -201,3 +200,4 @@ const Task1 = () => {
 };
 
 export default Task1;
+

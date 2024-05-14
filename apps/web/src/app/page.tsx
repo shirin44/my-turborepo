@@ -1,8 +1,8 @@
 
 "use client";
-// LandingPage.js
 import React from 'react';
 import { Typography, Button } from 'antd';
+import { CameraOutlined, HeartOutlined, StarOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
@@ -39,14 +39,14 @@ const LandingPage = () => {
           </ul>
         </div>
         <div className="flex justify-center">
-          <Button type="primary" className="mr-4 bg-gray-800 hover:bg-gray-900" onClick={handleTask1Click}>
-            Task 1: Furniture Image Classification
+          <Button type="primary" className="mr-4" style={{ backgroundColor: '#888', borderColor: '#888' }} icon={<CameraOutlined />} onClick={handleTask1Click}>
+            Image Classification
           </Button>
-          <Button type="primary" className="mr-4 bg-gray-800 hover:bg-gray-900" onClick={handleTask2Click}>
-            Task 2: Furniture Recommendation
+          <Button type="primary" className="mr-4" style={{ backgroundColor: '#888', borderColor: '#888' }} icon={<HeartOutlined />} onClick={handleTask2Click}>
+            Furniture Recommendation
           </Button>
-          <Button type="primary" className="bg-gray-800 hover:bg-gray-900" onClick={handleTask3Click}>
-            Task 3: Furniture Style Recognition
+          <Button type="primary" className="mr-4" style={{ backgroundColor: '#888', borderColor: '#888' }} icon={<StarOutlined />} onClick={handleTask3Click}>
+            Style Recognition
           </Button>
         </div>
       </div>
