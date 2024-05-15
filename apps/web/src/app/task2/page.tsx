@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Typography, Button, message } from "antd";
+import { Typography, Button, message, Spin } from "antd"; // Import Spin component
 import { UploadOutlined } from "@ant-design/icons";
 import * as tf from "@tensorflow/tfjs";
 
@@ -9,21 +9,16 @@ const { Title, Paragraph } = Typography;
 
 const Task2 = () => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [recommendedItems, setRecommendedItems] = useState<{ path: string; score: number }[]>([]);
+  const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
   const [modelLoaded, setModelLoaded] = useState<boolean>(false);
   const [model, setModel] = useState<tf.LayersModel | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       console.log("File uploaded:", file);
-      setUploadedImage(file); // Set the file object, not the data URL
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Optionally, you can set the data URL as well if needed
-        // setUploadedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setUploadedImage(file);
     }
   };
 
@@ -48,6 +43,8 @@ const Task2 = () => {
   const fetchRecommendations = async () => {
     if (uploadedImage && modelLoaded && model) {
       try {
+        setLoading(true);
+
         console.log("Preparing to fetch recommendations...");
 
         const formData = new FormData();
@@ -74,6 +71,8 @@ const Task2 = () => {
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         message.error("Failed to get recommendations.");
+      } finally {
+        setLoading(false);
       }
     } else {
       message.error("Please upload an image and ensure the model is loaded.");
@@ -138,6 +137,7 @@ const Task2 = () => {
             type="primary"
             onClick={handleFetchRecommendations}
             className="mt-4"
+            disabled={loading}
           >
             Fetch Recommendations
           </Button>
@@ -145,20 +145,28 @@ const Task2 = () => {
         {/* Recommended images area */}
         <div className="w-1/2 bg-white p-4">
           <Paragraph className="mb-4">Recommended Furniture Items</Paragraph>
-          {/* Display recommended items with image paths and similarity scores */}
-          <div className="grid grid-cols-2 gap-4">
-            {recommendedItems.map((item, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <img
-                  src={`http://localhost:5000/${item.path}`}
-                  alt={`Recommended ${index + 1}`}
-                  className="max-w-xs"
-                  style={{ maxWidth: "100%", height: "auto" }}
-                />
-                <span className="ml-2">{`Similarity Score: ${item.score.toFixed(2)}`}</span>
-              </div>
-            ))}
-          </div>
+          {/* Display recommended items in two columns */}
+          {loading ? ( // Render loading spinner if loading
+            <div className="flex justify-center items-center h-full">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {recommendedItems.map((item, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <img
+                    src={`http://localhost:5000/${item.path}`}
+                    alt={`Recommended ${index + 1}`}
+                    className="mb-2 max-w-xs"
+                    style={{ maxWidth: "100%", height: "auto" }}
+                  />
+                  <span className="text-sm text-gray-600">
+                    Similarity Score: {item.score.toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {/* Bottom section */}
