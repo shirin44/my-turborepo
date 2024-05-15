@@ -10,13 +10,14 @@ from tensorflow.keras.applications.resnet import preprocess_input
 from tensorflow.keras.models import load_model
 import pandas as pd
 import random
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
 # Load KNN model and ResNet model
-knn_model = load("KNN_ResNet.joblib")
+knn_model = load("KNN_ResNet_V2.joblib")
 resnet_model = load_model("ResNet_Furniture_Classification.h5")
 
 # Load image DataFrame
@@ -40,14 +41,15 @@ def get_recommendations():
         img_array = preprocess_input(img_array)  # Preprocess the image array
 
         # Extract features using ResNet model
-        feature_vector = resnet_model.predict(img_array)
-        feature_vector = feature_vector.flatten()
-        print(f"Feature vector: {feature_vector}")
+        input_image_features = resnet_model.predict(img_array).flatten()
+
+        # Log the shape of the extracted features
+        print("Shape of extracted features:", input_image_features.shape)
 
         # Query k-NN model for recommendations
-        _, indices = knn_model.kneighbors(feature_vector.reshape(1, -1), n_neighbors=10)  # Increased neighbors for more options
+        _, indices = knn_model.kneighbors(input_image_features.reshape(1, -1), n_neighbors=10)  # Increased neighbors for more options
 
-        # Get filenames of recommended images
+        # Get filenames and similarity scores of recommended images
         recommended_images = []
 
         # Add randomization to ensure diverse recommendations
@@ -55,7 +57,12 @@ def get_recommendations():
 
         for index in selected_indices:
             image_path = image_df.iloc[index]['Img']
-            recommended_images.append(image_path.replace('/Furniture_Data', ''))
+            similar_image_features = resnet_model.predict(np.expand_dims(img_preprocessing.load_img(image_path, target_size=(224, 224)), axis=0)).flatten()
+            similarity_score = float(cosine_similarity([input_image_features], [similar_image_features])[0][0])
+            recommended_images.append({'path': image_path.replace('/Furniture_Data', ''), 'score': similarity_score})
+
+            # Print the extracted features for each image
+            print(f"Extracted features for image '{image_path}': {similar_image_features.tolist()}")
 
         print(f"Recommended images: {recommended_images}")
         return jsonify(recommended_images)

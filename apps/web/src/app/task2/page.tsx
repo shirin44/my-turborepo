@@ -9,7 +9,7 @@ const { Title, Paragraph } = Typography;
 
 const Task2 = () => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [recommendedItems, setRecommendedItems] = useState<string[]>([]);
+  const [recommendedItems, setRecommendedItems] = useState<{ path: string; score: number }[]>([]);
   const [modelLoaded, setModelLoaded] = useState<boolean>(false);
   const [model, setModel] = useState<tf.LayersModel | null>(null);
 
@@ -145,17 +145,18 @@ const Task2 = () => {
         {/* Recommended images area */}
         <div className="w-1/2 bg-white p-4">
           <Paragraph className="mb-4">Recommended Furniture Items</Paragraph>
-          {/* Display recommended items in two columns */}
+          {/* Display recommended items with image paths and similarity scores */}
           <div className="grid grid-cols-2 gap-4">
-            // Inside Task2 component
-            {recommendedItems.map((imageUrl, index) => (
-              <img
-                key={index}
-                src={encodeURI(`http://localhost:5000/${imageUrl}`)} // Adjusted image path
-                alt={`Recommended ${index + 1}`}
-                className="mb-2 max-w-xs"
-                style={{ maxWidth: "100%", height: "auto" }} // Maintain aspect ratio
-              />
+            {recommendedItems.map((item, index) => (
+              <div key={index} className="flex items-center mb-2">
+                <img
+                  src={`http://localhost:5000/${item.path}`}
+                  alt={`Recommended ${index + 1}`}
+                  className="max-w-xs"
+                  style={{ maxWidth: "100%", height: "auto" }}
+                />
+                <span className="ml-2">{`Similarity Score: ${item.score.toFixed(2)}`}</span>
+              </div>
             ))}
           </div>
         </div>
