@@ -1,7 +1,7 @@
-"use client";
 
+"use client";
 import React, { useState, useEffect } from "react";
-import { Typography, Button, message, Spin } from "antd"; // Import Spin component
+import { Typography, Button, message, Spin, Modal } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import * as tf from "@tensorflow/tfjs";
 
@@ -13,13 +13,55 @@ const Task2 = () => {
   const [modelLoaded, setModelLoaded] = useState<boolean>(false);
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [extractedFeatures, setExtractedFeatures] = useState<number[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [selectedFeatures, setSelectedFeatures] = useState<number[] | null>(null);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       console.log("File uploaded:", file);
       setUploadedImage(file);
+      fetchRecommendations(file);
     }
+  };
+
+  const fetchRecommendations = async (imageFile: File) => {
+    if (modelLoaded && model) {
+      try {
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append("image", imageFile);
+
+        const response = await fetch(
+          "http://localhost:5000/api/recommendations",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setRecommendedItems(data.recommendations);
+          setExtractedFeatures(data.extracted_features);
+        } else {
+          throw new Error("Failed to fetch recommendations");
+        }
+      } catch (error) {
+        console.error("Error fetching recommendations:", error);
+        message.error("Failed to get recommendations.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      message.error("Please ensure the model is loaded.");
+    }
+  };
+
+  const handleGoBack = () => {
+    window.location.href = "/";
   };
 
   useEffect(() => {
@@ -40,56 +82,13 @@ const Task2 = () => {
     loadModel();
   }, []);
 
-  const fetchRecommendations = async () => {
-    if (uploadedImage && modelLoaded && model) {
-      try {
-        setLoading(true);
-
-        console.log("Preparing to fetch recommendations...");
-
-        const formData = new FormData();
-        formData.append("image", uploadedImage);
-
-        console.log("Sending request to server...");
-        const response = await fetch(
-          "http://localhost:5000/api/recommendations",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        console.log("Response:", response);
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Received recommendations:", data);
-          setRecommendedItems(data);
-        } else {
-          throw new Error("Failed to fetch recommendations");
-        }
-      } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        message.error("Failed to get recommendations.");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      message.error("Please upload an image and ensure the model is loaded.");
-    }
-  };
-
-  const handleFetchRecommendations = () => {
-    fetchRecommendations();
-  };
-
-  const handleGoBack = () => {
-    window.location.href = "/";
+  const showFeatures = (features: number[]) => {
+    setSelectedFeatures(features);
+    setModalVisible(true);
   };
 
   return (
     <div className="flex h-screen bg-gray-100 flex-1 flex-col">
-      {/* Top section */}
       <div className="flex justify-center items-center h-1/6 text-xl border-b border-black bg-gray-200">
         <div className="p-6">
           <Title level={2}>Task 2: Furniture Recommendation</Title>
@@ -99,9 +98,7 @@ const Task2 = () => {
           </Paragraph>
         </div>
       </div>
-      {/* Middle section */}
       <div className="flex-1 flex bg-gray-300">
-        {/* Upload area */}
         <div className="w-1/2 h-full flex flex-col justify-center items-center border-r border-black">
           <input
             type="file"
@@ -133,20 +130,18 @@ const Task2 = () => {
               )}
             </div>
           </label>
-          <Button
-            type="primary"
-            onClick={handleFetchRecommendations}
-            className="mt-4"
-            disabled={loading}
-          >
-            Fetch Recommendations
-          </Button>
+          {uploadedImage && (
+            <Button
+              type="link"
+              onClick={() => showFeatures(extractedFeatures)}
+            >
+              Show Uploaded Image Features
+            </Button>
+          )}
         </div>
-        {/* Recommended images area */}
         <div className="w-1/2 bg-white p-4">
           <Paragraph className="mb-4">Recommended Furniture Items</Paragraph>
-          {/* Display recommended items in two columns */}
-          {loading ? ( // Render loading spinner if loading
+          {loading ? (
             <div className="flex justify-center items-center h-full">
               <Spin size="large" />
             </div>
@@ -163,18 +158,35 @@ const Task2 = () => {
                   <span className="text-sm text-gray-600">
                     Similarity Score: {item.score.toFixed(2)}
                   </span>
+                  <Button
+                    type="link"
+                    onClick={() => showFeatures(item.features)}
+                  >
+                    Show Features
+                  </Button>
                 </div>
               ))}
             </div>
           )}
         </div>
       </div>
-      {/* Bottom section */}
       <div className="flex justify-center items-center h-1/6 text-xl border-t border-black bg-gray-200">
         <Button type="primary" onClick={handleGoBack} className="w-1/3 h-1/3">
           Return
         </Button>
       </div>
+      <Modal
+        title="Extracted Features"
+        visible={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setModalVisible(false)}>
+            Close
+          </Button>,
+        ]}
+      >
+        <pre>{JSON.stringify(selectedFeatures, null, 2)}</pre>
+      </Modal>
     </div>
   );
 };

@@ -4,14 +4,12 @@ import os
 import numpy as np
 from joblib import load
 from PIL import Image
-import tensorflow as tf
+import traceback
+from sklearn.metrics.pairwise import cosine_similarity
 from tensorflow.keras.preprocessing import image as img_preprocessing
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.models import load_model
 import pandas as pd
-import traceback
-import heapq
-from sklearn.metrics.pairwise import cosine_similarity
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -87,10 +85,16 @@ def get_recommendations():
         # Select the top 10 recommendations
         top_10_recommendations = recommended_images[:10]
 
-        # Log the recommended images
-        print("Recommended images:", top_10_recommendations)
+        # Extracted features to be sent along with recommendations
+        extracted_features = input_image_features.tolist()
 
-        return jsonify(top_10_recommendations)
+        # Prepare response
+        response_data = {
+            'recommendations': top_10_recommendations,
+            'extracted_features': extracted_features
+        }
+
+        return jsonify(response_data)
     except Exception as e:
         print(f"Error: {str(e)}")
         traceback.print_exc()  # Print the traceback for detailed error information
