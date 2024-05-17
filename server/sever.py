@@ -25,6 +25,7 @@ resnet_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', m
 # Load ResNet models
 resnet_furniture_model = load_model("ResNet_Furniture_Classification.h5", compile=False)
 resnet_style_model = load_model("ResNet_StyleOnly_Classification.h5", compile=False)
+resnet_duo_model = load_model("ResNet_Duo_Classification.h5", compile=False)
 
 # Preprocess the image
 def preprocess_image3(image):
@@ -33,17 +34,17 @@ def preprocess_image3(image):
     expanded_img = tf.expand_dims(processed_img, axis=0)
     return expanded_img
 
-# Classify the image using ResNet models
 def classify_image(image):
-    # Predict category using ResNet_Furniture_Classification.h5
-    category_prediction = resnet_furniture_model.predict(image)
-    category_label = np.argmax(category_prediction)
+    # Predict category and style labels
+    category_label, style_label = resnet_furniture_model.predict(image), resnet_style_model.predict(image)
 
-    # Predict style using ResNet_StyleOnly_Classification.h5
-    style_prediction = resnet_style_model.predict(image)
-    style_label = np.argmax(style_prediction)
+    # Get the category and style names from the labels
+    category_name = category_labels[np.argmax(category_label)]
+    style_name = style_labels[np.argmax(style_label)]
 
-    return category_label, style_label
+    return category_name, style_name
+
+
 
 # Define class labels for categories and styles
 category_labels = {
@@ -58,7 +59,7 @@ category_labels = {
 style_labels = {
     0: "Asian",
     1: "Beach",
-    2: "Contemp",
+    2: "Contemporary",
     3: "Craftsman",
     4: "Eclectic",
     5: "Farmhouse",
@@ -96,14 +97,12 @@ def get_recommendations_task3():
         img_array = img_array / 255.0  # Normalize pixel values
 
         # Classify the image
-        category_label, style_label = classify_image(img_array)
-
-        # Convert numeric labels to names
-        category_name = category_labels[category_label]
-        style_name = style_labels[style_label]
+        category_name, style_name = classify_image(img_array)
 
         # Log the category and style labels
-        print("Category:", category_name)
+        print("Category Name:", category_name)
+
+
         print("Style:", style_name)
 
         # Generate paths for category and style folders
@@ -118,9 +117,8 @@ def get_recommendations_task3():
 
         # Prepare response
         response_data = {
-            'predictedCategory': category_name,
-            'predictedStyle': style_name,
-            'recommendations': recommended_images  # Change the key to 'recommendedImages'
+            'predictedCategoryStyle': f"{category_name}_{style_name}",
+            'recommendations': recommended_images
         }
 
         # Log the response data
@@ -132,7 +130,6 @@ def get_recommendations_task3():
         traceback.print_exc()  # Print the traceback for detailed error information
         return jsonify(error='Failed to process request'), 500
 
-    
 
 
 # Load image DataFrame

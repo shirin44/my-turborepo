@@ -2,6 +2,12 @@
 
 This is an official starter Turborepo.
 
+## to run web 
+turbo run dev --filter=web
+
+## to run server 
+python sever.py
+
 ## Using this example
 
 Run the following command:
