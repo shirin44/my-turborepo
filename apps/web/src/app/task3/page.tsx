@@ -1,18 +1,20 @@
 "use client";
-import React, { useState } from 'react';
-import { Typography, message, Spin, Button } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import React, { useState } from "react";
+import { Typography, message, Spin, Button } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 
 const Task3: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [predictedCategory, setPredictedCategory] = useState<string>('');
-  const [predictedStyle, setPredictedStyle] = useState<string>('');
+  const [predictedCategory, setPredictedCategory] = useState<string>("");
+  const [predictedStyle, setPredictedStyle] = useState<string>("");
   const [recommendations, setRecommendations] = useState<any[]>([]);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files) {
       const file = event.target.files[0];
       setSelectedFile(file);
@@ -20,20 +22,27 @@ const Task3: React.FC = () => {
     }
   };
 
+  const handleGoBack = () => {
+    window.location.href = "/";
+  };
+
   const handleSubmit = async (file: File) => {
     setLoading(true);
-    setPredictedCategory('');
-    setPredictedStyle('');
+    setPredictedCategory("");
+    setPredictedStyle("");
     setRecommendations([]);
 
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append("image", file);
 
-      const response = await fetch('http://localhost:5000/api/recommendations_task3', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/recommendations_task3",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -41,12 +50,21 @@ const Task3: React.FC = () => {
 
       const data = await response.json();
 
+      console.log("Response from server:", data); // Log the response data
+
       setPredictedCategory(data.predictedCategory);
       setPredictedStyle(data.predictedStyle);
-      setRecommendations(data.recommendations);
+
+      if (data.recommendations && Array.isArray(data.recommendations)) {
+        setRecommendations(data.recommendations);
+        console.log("Received Recommendations:", data.recommendations);
+      } else {
+        console.error("No recommendations found in the response");
+        message.error("Failed to fetch recommendations.");
+      }
     } catch (error) {
-      console.error('Error uploading file:', error);
-      message.error('Failed to upload file.');
+      console.error("Error uploading file:", error);
+      message.error("Failed to upload file.");
     } finally {
       setLoading(false);
     }
@@ -56,13 +74,16 @@ const Task3: React.FC = () => {
     <div className="flex h-screen bg-gray-100 flex-col">
       <div className="flex justify-center items-center h-1/6 text-xl border-b border-black bg-gray-200">
         <div className="p-6">
-          <Title level={2}>Task 3: Image Classification and Recommendations</Title>
+          <Title level={2}>
+            Task 3: Image Classification and Recommendations
+          </Title>
           <Paragraph>
             Upload an image to get recommendations for similar furniture items.
           </Paragraph>
           {predictedCategory && predictedStyle && (
             <Paragraph>
-              Predicted Category: {predictedCategory}, Predicted Style: {predictedStyle}
+              Predicted Category: {predictedCategory}, Predicted Style:{" "}
+              {predictedStyle}
             </Paragraph>
           )}
         </div>
@@ -90,7 +111,7 @@ const Task3: React.FC = () => {
               ) : (
                 <>
                   <UploadOutlined
-                    style={{ fontSize: '32px', color: '#1890ff' }}
+                    style={{ fontSize: "32px", color: "#1890ff" }}
                   />
                   <Paragraph className="mt-2 text-gray-800">
                     Click or drag image to upload
@@ -111,10 +132,10 @@ const Task3: React.FC = () => {
               {recommendations.map((recommendation: any, index: number) => (
                 <div key={index} className="flex flex-col items-center">
                   <img
-                    src={`http://localhost:5000/${recommendation.Img}`}
+                    src={`http://localhost:5000/${recommendation}`}
                     alt={`Recommended ${index + 1}`}
                     className="mb-2 max-w-xs"
-                    style={{ maxWidth: '100%', height: 'auto' }}
+                    style={{ maxWidth: "100%", height: "auto" }}
                   />
                 </div>
               ))}
@@ -123,7 +144,7 @@ const Task3: React.FC = () => {
         </div>
       </div>
       <div className="flex justify-center items-center h-1/6 text-xl border-t border-black bg-gray-200">
-        <Button type="primary" className="w-1/3 h-1/3">
+        <Button type="primary" onClick={handleGoBack} className="w-1/3 h-1/3">
           Return
         </Button>
       </div>
