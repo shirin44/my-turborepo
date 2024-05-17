@@ -1,65 +1,131 @@
 "use client";
 import React, { useState } from 'react';
-import { Typography, Button, Upload, message } from 'antd';
+import { Typography, message, Spin, Button } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
-const Task3 = () => {
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+const Task3: React.FC = () => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [predictedCategory, setPredictedCategory] = useState<string>('');
+  const [predictedStyle, setPredictedStyle] = useState<string>('');
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
-  const handleUpload = (info: any) => {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-      // Set the uploaded image to display
-      setUploadedImage(URL.createObjectURL(info.file.originFileObj));
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const file = event.target.files[0];
+      setSelectedFile(file);
+      await handleSubmit(file);
     }
   };
 
-  const handleGoBack = () => {
-    window.location.href = '/';
+  const handleSubmit = async (file: File) => {
+    setLoading(true);
+    setPredictedCategory('');
+    setPredictedStyle('');
+    setRecommendations([]);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('http://localhost:5000/api/recommendations_task3', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      setPredictedCategory(data.predictedCategory);
+      setPredictedStyle(data.predictedStyle);
+      setRecommendations(data.recommendations);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      message.error('Failed to upload file.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 flex-1 flex-col">
-      {/* Top section */}
+    <div className="flex h-screen bg-gray-100 flex-col">
       <div className="flex justify-center items-center h-1/6 text-xl border-b border-black bg-gray-200">
         <div className="p-6">
-          <Title level={2}>Task 3: Furniture Style Recognition</Title>
+          <Title level={2}>Task 3: Image Classification and Recommendations</Title>
           <Paragraph>
-            Determine the style of a furniture item. Recommended furniture items must be in the same interior style as the input image.
+            Upload an image to get recommendations for similar furniture items.
           </Paragraph>
+          {predictedCategory && predictedStyle && (
+            <Paragraph>
+              Predicted Category: {predictedCategory}, Predicted Style: {predictedStyle}
+            </Paragraph>
+          )}
         </div>
       </div>
-      {/* Middle section */}
-      <div className="flex-1 flex items-center justify-center text-xl bg-gray-300 relative">
-        {/* Upload area */}
-        <Upload
-          action=""
-          beforeUpload={() => false}
-          showUploadList={false}
-          onChange={handleUpload}
-          className="w-2/3 h-3/4 flex justify-center items-center border border-black rounded-lg overflow-hidden"
-        >
-          {uploadedImage ? (
-            <img src={uploadedImage} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-          ) : (
+      <div className="flex-1 flex bg-gray-300">
+        <div className="w-1/2 h-full flex flex-col justify-center items-center border-r border-black">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+            id="uploadInput"
+          />
+          <label
+            htmlFor="uploadInput"
+            className="w-2/3 h-3/4 flex justify-center items-center border rounded-lg overflow-hidden cursor-pointer bg-white border-black"
+          >
             <div className="text-center">
-              <UploadOutlined style={{ fontSize: '32px' }} />
-              <Paragraph className="mt-2">Click or drag image to upload</Paragraph>
+              {selectedFile ? (
+                <img
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Uploaded"
+                  className="max-w-full max-h-full"
+                />
+              ) : (
+                <>
+                  <UploadOutlined
+                    style={{ fontSize: '32px', color: '#1890ff' }}
+                  />
+                  <Paragraph className="mt-2 text-gray-800">
+                    Click or drag image to upload
+                  </Paragraph>
+                </>
+              )}
+            </div>
+          </label>
+        </div>
+        <div className="w-1/2 bg-white p-4">
+          <Paragraph className="mb-4">Recommended Furniture Items</Paragraph>
+          {loading ? (
+            <div className="flex justify-center items-center h-full">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {recommendations.map((recommendation: any, index: number) => (
+                <div key={index} className="flex flex-col items-center">
+                  <img
+                    src={`http://localhost:5000/${recommendation.Img}`}
+                    alt={`Recommended ${index + 1}`}
+                    className="mb-2 max-w-xs"
+                    style={{ maxWidth: '100%', height: 'auto' }}
+                  />
+                </div>
+              ))}
             </div>
           )}
-        </Upload>
+        </div>
       </div>
-      {/* Bottom section */}
       <div className="flex justify-center items-center h-1/6 text-xl border-t border-black bg-gray-200">
-        <Button type="primary" onClick={handleGoBack} className="w-1/3 h-1/3">Return</Button>
+        <Button type="primary" className="w-1/3 h-1/3">
+          Return
+        </Button>
       </div>
     </div>
   );
