@@ -74,11 +74,11 @@ const Task3: React.FC = () => {
     <div className="flex h-screen bg-gray-100 flex-col">
       <div className="flex justify-center items-center h-1/6 text-xl border-b border-black bg-gray-200">
         <div className="p-6">
-          <Title level={2}>
+          <Title level={1}>
             Task 3: Image Classification and Recommendations
           </Title>
-          <Paragraph>
-            Upload an image to get recommendations for similar furniture items.
+          <Paragraph className=" text-3xl">
+            Upload an image to get recommendations for similar furniture items based on category and style .
           </Paragraph>
           {predictedCategory && predictedStyle && (
             <Paragraph>
@@ -121,8 +121,8 @@ const Task3: React.FC = () => {
             </div>
           </label>
         </div>
-        <div className="w-1/2 bg-white p-4">
-          <Paragraph className="mb-4">Recommended Furniture Items</Paragraph>
+        <div className="w-1/2 bg-white p-4 ">
+          <Paragraph className="mb-4 text-2xl">Recommended Furniture Items</Paragraph>
           {loading ? (
             <div className="flex justify-center items-center h-full">
               <Spin size="large" />

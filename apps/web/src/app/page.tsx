@@ -1,8 +1,7 @@
-
 "use client";
 import React from 'react';
 import { Typography, Button } from 'antd';
-import { CameraOutlined, HeartOutlined, StarOutlined } from '@ant-design/icons';
+import { CameraOutlined, HeartOutlined, StarOutlined, RocketOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
@@ -19,17 +18,21 @@ const LandingPage = () => {
     window.location.href = "/task3";
   };
 
+  const handleTask12Click = () => {
+    window.location.href = "/task1-2";
+  };
+
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="w-2/3 p-8 rounded-lg bg-white shadow-lg">
-        <Title className="text-4xl mb-6 text-gray-800">Furniture Recommender</Title>
-        <Paragraph className="text-lg mb-6 text-gray-900">
+      <div className="w-4/5 p-10 rounded-lg bg-white shadow-lg">
+        <Title className="text-6xl mb-8 text-gray-800 text-center">Furniture Recommender</Title>
+        <Paragraph className=" text-3xl mb-8 text-gray-900 text-center">
           This website showcases the results of our machine learning project. 
           Users can explore furniture recommendations and more!
         </Paragraph>
-        <div className="text-lg mb-6 text-gray-900">
-          <Title level={3}>Team Number: 7</Title>
-          <Title level={3}>Team Members:</Title>
+        <div className="text-2xl mb-8 text-gray-900">
+          <Title level={2}>Team Number: 7</Title>
+          <Title level={2}>Team Members:</Title>
           <ul className="list-disc list-inside">
             <li>Shirin Shujaa - S3983427</li>
             <li>Nguyen Vu Thuy Duong - S3865443</li>
@@ -38,14 +41,19 @@ const LandingPage = () => {
             <li>Tran Viet Hoang - S3928141</li>
           </ul>
         </div>
-        <div className="flex justify-center">
-          <Button type="primary" className="mr-4" style={{ backgroundColor: '#888', borderColor: '#888' }} icon={<CameraOutlined />} onClick={handleTask1Click}>
-            Image Classification
+        <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+          <Button type="primary" className="w-full md:w-auto md:h-auto" style={{ backgroundColor: '#888', borderColor: '#888', fontSize: '1.6rem', padding: '20px' }} icon={<CameraOutlined />} onClick={handleTask1Click}>
+            Image Classification using Resnet 
           </Button>
-          <Button type="primary" className="mr-4" style={{ backgroundColor: '#888', borderColor: '#888' }} icon={<HeartOutlined />} onClick={handleTask2Click}>
+          <Button type="primary" className="w-full md:w-auto md:h-auto" style={{ backgroundColor: '#888', borderColor: '#888', fontSize: '1.6rem', padding: '20px' }} icon={<RocketOutlined />} onClick={handleTask12Click}>
+            Image Classification using Inception
+          </Button>
+        </div>
+        <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mt-4">
+          <Button type="primary" className="w-full md:w-auto md:h-auto" style={{ backgroundColor: '#888', borderColor: '#888', fontSize: '1.6rem', padding: '20px' }} icon={<HeartOutlined />} onClick={handleTask2Click}>
             Furniture Recommendation
           </Button>
-          <Button type="primary" className="mr-4" style={{ backgroundColor: '#888', borderColor: '#888' }} icon={<StarOutlined />} onClick={handleTask3Click}>
+          <Button type="primary" className="w-full md:w-auto md:h-auto" style={{ backgroundColor: '#888', borderColor: '#888', fontSize: '1.6rem', padding: '20px' }} icon={<StarOutlined />} onClick={handleTask3Click}>
             Style Recognition
           </Button>
         </div>

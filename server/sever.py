@@ -74,6 +74,15 @@ tables_style_model.compile(optimizer='adam', loss='sparse_categorical_crossentro
 dressers_style_model = load_model("task3/ResNet_Furniture_Classification_dressersv2.h5", compile=False)
 dressers_style_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
+lamps_style_model = load_model("task3/ResNet_Furniture_DClassification_lampsv2.h5", compile=False)
+lamps_style_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+
+
+# Load the Inception model
+inception_model = load_model("Inception.h5")
+
+
 # Preprocess the image
 def preprocess_image3(image):
     resized_img = tf.image.resize(image, [224, 224])
@@ -89,17 +98,22 @@ def classify_image(image):
         style_label = chairs_style_model.predict(image)
     elif category_name == "Beds":
         style_label = beds_style_model.predict(image)
-    elif category_name == "sofas":
+    elif category_name == "Sofas":
         style_label = sofas_style_model.predict(image)
-    elif category_name == "tables":
+    elif category_name == "Tables":
         style_label = tables_style_model.predict(image)
-    elif category_name == "dressers":
+    elif category_name == "Dressers":
         style_label = dressers_style_model.predict(image)
+    elif category_name == "Lamps":
+        style_label = lamps_style_model.predict(image)
     
-
     style_name = STYLE_LABELS[np.argmax(style_label)]
+    
+    # Log predicted category and style
+    print(f"Predicted Category: {category_name}, Predicted Style: {style_name}")
 
     return category_name, style_name
+
 
 # Get random images from directory
 def get_random_images(directory, num_images=10):
@@ -165,12 +179,13 @@ features_matrix = np.load("image_features_v2.npy")
 
 # Preprocess the uploaded image
 def preprocess_image(img):
-    img = img.resize((224, 224))
+    img = img.resize((224, 224))  # Resize the image to (224, 224)
     img_array = img_preprocessing.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
     img_array = img_array / 255.0
     img_array = preprocess_input(img_array)
     return img_array
+
 
 # Extract features from the preprocessed image
 def extract_features(image_pil, model):
@@ -194,7 +209,7 @@ def get_recommendations():
     try:
         uploaded_image = request.files['image']
         img = Image.open(uploaded_image)
-        img_array = preprocess_image(img)
+        img = img.resize((224, 224))  # Resize the image to (224, 224)
         query_features = extract_features(img, resnet_model)
 
         # Logging the extracted features
@@ -234,6 +249,43 @@ def get_image(filepath):
         return response
     else:
         return "Image not found", 404
+    
+
+# Preprocess the image for Inception model
+def preprocess_image_inception(image):
+    resized_img = tf.image.resize(image, [299, 299])
+    preprocessed_img = tf.keras.applications.inception_v3.preprocess_input(resized_img)
+    return preprocessed_img
+
+# Classify the image using Inception model
+def classify_image_inception(image):
+    predictions = inception_model.predict(image)
+    predicted_label = np.argmax(predictions)
+    return predicted_label
+
+# Route to handle image classification request for task1-2
+@app.route('/api/task1V2', methods=['POST'])
+def classify_image_task1_2():
+    try:
+        uploaded_image = request.files['image']
+        img = Image.open(uploaded_image)
+        img_array = np.array(img)
+        preprocessed_img = preprocess_image_inception(img_array)
+        predicted_label = classify_image_inception(np.expand_dims(preprocessed_img, axis=0))
+        
+        # For simplicity, assuming the labels are in a list
+        labels = ["Bed", "Chair", "Dresser","Lamp","Sofa","Table"]  
+        
+        response_data = {
+            'predictedLabel': labels[predicted_label]
+        }
+        
+        return jsonify(response_data)
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        traceback.print_exc()
+        return jsonify(error='Failed to process request'), 500
+
 
 # Run the Flask app
 if __name__ == '__main__':

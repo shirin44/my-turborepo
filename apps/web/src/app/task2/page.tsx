@@ -90,9 +90,9 @@ const Task2 = () => {
   return (
     <div className="flex h-screen bg-gray-100 flex-1 flex-col">
       <div className="flex justify-center items-center h-1/6 text-xl border-b border-black bg-gray-200">
-        <div className="p-6">
-          <Title level={2}>Task 2: Furniture Recommendation</Title>
-          <Paragraph>
+        <div className="p-6 text-3xl">
+          <Title level={1}>Task 2: Furniture Recommendation</Title>
+          <Paragraph className=" text-3xl">
             Recommend 10 furniture items in our dataset which are similar to the
             input furniture item image from users.
           </Paragraph>
@@ -140,7 +140,7 @@ const Task2 = () => {
           )}
         </div>
         <div className="w-1/2 bg-white p-4">
-          <Paragraph className="mb-4">Recommended Furniture Items</Paragraph>
+          <Paragraph className="mb-4 text-2xl">Recommended Furniture Items</Paragraph>
           {loading ? (
             <div className="flex justify-center items-center h-full">
               <Spin size="large" />
@@ -158,12 +158,7 @@ const Task2 = () => {
                   <span className="text-sm text-gray-600">
                     Similarity Score: {item.score.toFixed(2)}
                   </span>
-                  <Button
-                    type="link"
-                    onClick={() => showFeatures(item.features)}
-                  >
-                    Show Features
-                  </Button>
+                  
                 </div>
               ))}
             </div>
