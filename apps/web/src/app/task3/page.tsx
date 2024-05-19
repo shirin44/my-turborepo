@@ -81,7 +81,7 @@ const Task3: React.FC = () => {
             Upload an image to get recommendations for similar furniture items based on category and style .
           </Paragraph>
           {predictedCategory && predictedStyle && (
-            <Paragraph>
+            <Paragraph className=" text-2xl">
               Predicted Category: {predictedCategory}, Predicted Style:{" "}
               {predictedStyle}
             </Paragraph>
