@@ -51,13 +51,13 @@ STYLE_LABELS = {
 }
 
 # Load models
-knn_model = load("KNN_ResNet_V2S.joblib")
+
 resnet_model = load_model("ResNet_Furniture_Classification.h5", compile=False)
 resnet_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
 resnet_furniture_model = load_model("ResNet_Furniture_Classification.h5", compile=False)
 
-
+#load style models
 chairs_style_model = load_model("task3/Chairs_Style_Classification.h5", compile=False)
 chairs_style_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
@@ -77,18 +77,12 @@ dressers_style_model.compile(optimizer='adam', loss='sparse_categorical_crossent
 lamps_style_model = load_model("task3/ResNet_Furniture_DClassification_lampsv2.h5", compile=False)
 lamps_style_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
-
-
 # Load the Inception model
 inception_model = load_model("Inception.h5")
 
 
-# Preprocess the image
-def preprocess_image3(image):
-    resized_img = tf.image.resize(image, [224, 224])
-    processed_img = resized_img / 255.0
-    expanded_img = tf.expand_dims(processed_img, axis=0)
-    return expanded_img
+
+
 
 def classify_image(image):
     category_label = resnet_furniture_model.predict(image)
@@ -168,10 +162,7 @@ def extract_features(img_array):
     features = resnet_model.predict(img_array)
     return features.flatten()
 
-# Find similar images based on extracted features
-def find_similar_images(input_features, knn_model, k=10):
-    distances, indices = knn_model.kneighbors(input_features.reshape(1, -1), n_neighbors=k)
-    return distances, indices
+
 
 # Load image DataFrame and feature matrix
 image_df = pd.read_csv("df.csv")
