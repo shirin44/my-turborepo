@@ -12,6 +12,7 @@ from tensorflow.keras.models import load_model
 import pandas as pd
 import tensorflow as tf
 import random
+import logging
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -158,6 +159,35 @@ def find_similar_images(input_features, knn_model, k=10):
     distances, indices = knn_model.kneighbors(input_features.reshape(1, -1), n_neighbors=k)
     return distances, indices
 
+# Load image DataFrame and feature matrix
+image_df = pd.read_csv("df.csv")
+features_matrix = np.load("image_features_v2.npy")
+
+# Preprocess the uploaded image
+def preprocess_image(img):
+    img = img.resize((224, 224))
+    img_array = img_preprocessing.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = img_array / 255.0
+    img_array = preprocess_input(img_array)
+    return img_array
+
+# Extract features from the preprocessed image
+def extract_features(image_pil, model):
+    img = img_preprocessing.img_to_array(image_pil)
+    img = np.expand_dims(img, axis=0)
+    img = img / 255.0  # Normalize pixel values
+    features = model.predict(img)
+    return features.flatten()
+
+# Find most similar images based on extracted features
+def get_most_similar_images(query_features, features_matrix, df, top_n=10):
+    similarity_scores = cosine_similarity([query_features], features_matrix).flatten()
+    sorted_indices = np.argsort(similarity_scores)[::-1]
+    most_similar_indices = sorted_indices[:top_n]
+    similar_images = [(df['Img'][i], df['Category'][i], df['Style'][i], similarity_scores[i]) for i in most_similar_indices]
+    return similar_images
+
 # Route to handle recommendations request
 @app.route('/api/recommendations', methods=['POST'])
 def get_recommendations():
@@ -165,37 +195,32 @@ def get_recommendations():
         uploaded_image = request.files['image']
         img = Image.open(uploaded_image)
         img_array = preprocess_image(img)
-        input_image_features = extract_features(img_array)
-        distances, indices = find_similar_images(input_image_features, knn_model)
+        query_features = extract_features(img, resnet_model)
+
+        # Logging the extracted features
+        logging.info(f"Extracted features: {query_features}")
+
+        similar_images = get_most_similar_images(query_features, features_matrix, image_df)
+
+        # Logging the similar images
+        logging.info(f"Similar images: {similar_images}")
+
         recommended_images = []
-
-        for index in indices[0]:
-            image_path = image_df.iloc[index]['Img']
-                    
-            if not os.path.exists(image_path):
-                print(f"Image not found at path: {image_path}")
-                continue
-
-            similar_img = Image.open(image_path)
-            similar_img_resized = similar_img.resize((224, 224))
-            similar_image_features = extract_features(np.expand_dims(img_preprocessing.img_to_array(similar_img_resized) / 255.0, axis=0))
-            similarity_score = cosine_similarity([input_image_features], [similar_image_features])[0][0]
-            recommended_images.append({'path': image_path, 'score': float(similarity_score)})
-
-        recommended_images.sort(key=lambda x: x['score'], reverse=True)
-        top_10_recommendations = recommended_images[:10]
-        extracted_features = input_image_features.tolist()
+        for img_path, category, style, score in similar_images:
+            if os.path.exists(img_path):
+                recommended_images.append({'path': img_path, 'category': category, 'style': style, 'score': float(score)})
 
         response_data = {
-            'recommendations': top_10_recommendations,
-            'extracted_features': extracted_features
+            'recommendations': recommended_images,
+            'extracted_features': query_features.tolist()
         }
 
         return jsonify(response_data)
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logging.error(f"Error: {str(e)}")
         traceback.print_exc()
         return jsonify(error='Failed to process request'), 500
+
 
 # Route to serve images
 @app.route('/Furniture_Data/<path:filepath>')
