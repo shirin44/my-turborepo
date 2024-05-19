@@ -1,64 +1,55 @@
-# Turborepo Tailwind CSS starter
+# Furniture Recommendation System
 
-This is an official starter Turborepo.
+## How to Run
 
-## to run web 
-turbo run dev --filter=web
+### Web Application
 
-## to run server 
-python sever.py
-
-## Using this example
-
-Run the following command:
+To run the web application:
 
 ```sh
-npx create-turbo@latest -e with-tailwind
+turbo run dev --filter=web
 ```
 
-## What's inside?
+### Server
 
-This Turborepo includes the following packages/apps:
+To run the server:
+
+```sh
+python sever.py
+```
+
+## Project Structure
+
+This project is organized as a Turborepo with multiple packages and apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- **docs**: a Next.js app with Tailwind CSS for documentation purposes.
+- **web**: another Next.js app with Tailwind CSS for the main user interface.
+- **server**: a Flask server for handling image uploads and providing recommendations.
+- **ui**: a React component library with Tailwind CSS shared by both web and docs applications.
+- **@repo/eslint-config**: eslint configurations including eslint-config-next and eslint-config-prettier.
+- **@repo/typescript-config**: TypeScript configurations used throughout the monorepo.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Each package/app is written in TypeScript for static type checking.
 
-### Building packages/ui
+### Building UI Components
 
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.js`. This was chosen for several reasons:
+The `ui` package contains reusable React components styled with Tailwind CSS. These components are consumed by both the `web` and `docs` applications. 
 
-- Make sharing one `tailwind.config.js` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
+The Tailwind CSS styles for the `ui` package are compiled into the `dist` directory for easy consumption. The component `.tsx` files are transpiled by the Next.js Compiler and `tailwindcss`. This approach ensures clear package export boundaries and prevents class name conflicts.
 
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.js` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
+## Technologies Used
 
-For example, in [tailwind.config.js](packages/tailwind-config/tailwind.config.js):
+- **Python**: Backend development is done using Flask.
+- **JavaScript/TypeScript**: Frontend development is done using Next.js and React.
+- **Tailwind CSS**: Used for styling the user interface components.
+- **TensorFlow**: Utilized for feature extraction and image classification in the recommendation system.
+- **Flask**: Backend server framework for handling image uploads and providing recommendations.
 
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
+## Usage
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
+1. **Upload Image**: Users can upload an image of a furniture item they like.
+2. **View Recommendations**: The system will display recommendations of similar furniture items based on the uploaded image.
+3. **API Integration**: The system provides APIs for integrating the recommendation system into other applications.
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
